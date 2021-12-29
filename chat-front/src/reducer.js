@@ -1,12 +1,15 @@
 const initialState = {
-
+    user: '',
+    messages: []
 }
 
 export const reducer = (state = initialState, action) => {
     switch (action.type) {
-        case '':
-            
-            break;
+        case 'GET_MESSAGE':
+            return {
+                user: state.user,
+                messages: [...state.messages, action.data] 
+            }
     
         default:
             return state;
