@@ -4,3 +4,10 @@ export const getMassage = (newMessage) => {
         data: newMessage
     }
 }
+
+export const setUser = (username) => {
+    return {
+        type: 'SET_USER',
+        data: username
+    }
+}
