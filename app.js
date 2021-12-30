@@ -1,6 +1,4 @@
 const app = require("express")();
-const cors = require('cors');
-app.use(cors())
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {
     cors: {
@@ -13,11 +11,15 @@ const io = require("socket.io")(http, {
 
 io.on("connection", (socket) => {
     socket.on("message", (message) => {
-      io.emit("messageBack", message);
+        if(message.sendTo !== 'everyone') {
+            io.to(message.sendTo).emit("messageBack", message);
+        }
+        else {
+            io.emit("messageBack", message);
+        }
     });
 
     socket.on("user", (user)=>{
-        console.log(user);
         users.push(user);
         io.emit("userUpdate", users);
     })
@@ -27,8 +29,10 @@ io.on("connection", (socket) => {
             if(users[i].id === socket.id){
                 io.emit("messageBack", { name: users[i].name, message: "disconnected" });
                 users.splice(i, 1);
+                break;
             }
         }
+        console.log(users);
         io.emit("userUpdate", users);
       });
   

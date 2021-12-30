@@ -7,14 +7,15 @@ import {
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
+const connection = io("http://localhost:4000")
+
 function App() {
   const [messageArr, setMessages] = useState([]);
-  const [user, setUser] = useState({id: null, name: ''});
+  const [user, setUser] = useState({id: connection.id, name: ''});
   const [usersList, setUsersList] = useState([]);
-  const socketRef = useRef();
+  const [msgDes, setMsgDes] = useState('everyone');
   const messageInput = useRef(null);
   const username = useRef(null);
-
 
   const checkUsername = (e) => {
     if(username.current.value === ''){
@@ -25,21 +26,22 @@ function App() {
 
   const setUserInfo = () => {
     setUser({id: user.id, name: username.current.value});
-    socketRef.current.emit("user", {id: user.id, name: username.current.value})
+    connection.emit("user", {id: connection.id, name: username.current.value})
+  }
+
+  const sendMsg =()=>{
+    connection.emit("message", { name: user.name, message: messageInput.current.value, sendTo: msgDes });
+    setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes }])
+    messageInput.current.value = '';
   }
 
   useEffect(()=>{
-    socketRef.current = io.connect("http://localhost:4000");
-    setTimeout(()=>{
-      setUser({id: socketRef.current.id, name: user.name});
-     console.log(user.id);
-    },80)
-
-    socketRef.current.on("messageBack", (message) => {
+    
+    connection.on("messageBack", (message) => {
       setMessages([...messageArr, message])
     });
 
-    socketRef.current.on("userUpdate", (updatedUsersList)=>{
+    connection.on("userUpdate", (updatedUsersList)=>{
       setUsersList(updatedUsersList);
     })
 
@@ -59,7 +61,7 @@ function App() {
           <div>
             <ul>
               {usersList.map((user)=>{
-                return <li>{user.name}</li>
+                return <li onClick={()=>{setMsgDes(user.id)}} key={user.id}>{user.name}</li>
               })}
             </ul>
             <div>----------------</div>
@@ -69,7 +71,8 @@ function App() {
         })}
       </ul>
       <input ref={messageInput} type={'text'} placeholder="your message"></input>
-      <button onClick={()=>{socketRef.current.emit("message", { name: user.name, message: messageInput.current.value });}}></button>
+      <button onClick={sendMsg}>send</button>
+      <div>send to: {msgDes}</div>
           </div>
         }/>
       
