@@ -1,10 +1,3 @@
-/*const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
-*/
 const app = require("express")();
 const cors = require('cors');
 app.use(cors())
@@ -15,13 +8,28 @@ const io = require("socket.io")(http, {
     }
   });
 
+  const users = [];
+
 
 io.on("connection", (socket) => {
     socket.on("message", (message) => {
       io.emit("messageBack", message);
     });
+
+    socket.on("user", (user)=>{
+        console.log(user);
+        users.push(user);
+        io.emit("userUpdate", users);
+    })
+
     socket.on("disconnect", () => {
-        io.emit("messageBack", { name: "wow", message: "render" });
+        for(let i = 0; i < users.length; i++){
+            if(users[i].id === socket.id){
+                io.emit("messageBack", { name: users[i].name, message: "disconnected" });
+                users.splice(i, 1);
+            }
+        }
+        io.emit("userUpdate", users);
       });
   
   });
