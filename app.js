@@ -11,8 +11,8 @@ const io = require("socket.io")(http, {
 
 io.on("connection", (socket) => {
     socket.on("message", (message) => {
-        if(message.sendTo !== 'everyone') {
-            io.to(message.sendTo).emit("messageBack", message);
+        if(message.sendTo.name !== 'everyone') {
+            io.to(message.sendTo.id).emit("messageBack", message);
         }
         else {
             io.emit("messageBack", message);

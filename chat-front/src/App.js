@@ -13,7 +13,7 @@ function App() {
   const [messageArr, setMessages] = useState([]);
   const [user, setUser] = useState({id: connection.id, name: ''});
   const [usersList, setUsersList] = useState([]);
-  const [msgDes, setMsgDes] = useState('everyone');
+  const [msgDes, setMsgDes] = useState({name: 'everyone', id: ''});
   const messageInput = useRef(null);
   const username = useRef(null);
 
@@ -31,7 +31,9 @@ function App() {
 
   const sendMsg =()=>{
     connection.emit("message", { name: user.name, message: messageInput.current.value, sendTo: msgDes });
-    setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes }])
+    if(msgDes.name !== 'everyone') {
+      setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes }])
+    }
     messageInput.current.value = '';
   }
 
@@ -61,7 +63,7 @@ function App() {
           <div>
             <ul>
               {usersList.map((user)=>{
-                return <li onClick={()=>{setMsgDes(user.id)}} key={user.id}>{user.name}</li>
+                return <li onClick={()=>{setMsgDes({name: user.name, id: user.id})}} key={user.id}>{user.name}</li>
               })}
             </ul>
             <div>----------------</div>
@@ -72,7 +74,8 @@ function App() {
       </ul>
       <input ref={messageInput} type={'text'} placeholder="your message"></input>
       <button onClick={sendMsg}>send</button>
-      <div>send to: {msgDes}</div>
+      <div>send to: {msgDes.name}</div>
+      <button onClick={()=>{setMsgDes({name: 'everyone', id: msgDes.id})}}>back to everyone</button>
           </div>
         }/>
       
