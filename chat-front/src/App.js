@@ -14,6 +14,7 @@ function App() {
   const [user, setUser] = useState({id: connection.id, name: ''});
   const [usersList, setUsersList] = useState([]);
   const [msgDes, setMsgDes] = useState({name: 'everyone', id: ''});
+  const [msgType, setMsgType] = useState('message');
   const messageInput = useRef(null);
   const username = useRef(null);
 
@@ -37,9 +38,9 @@ function App() {
   }
 
   const sendMsg =()=>{
-    connection.emit("message", { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(11, 17) });
+    connection.emit("message", { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(11, 17), type: msgType });
     if(msgDes.name !== 'everyone') {
-      setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(10, 16) }])
+      setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(10, 16), type: msgType }])
     }
     messageInput.current.value = '';
   }
@@ -78,7 +79,12 @@ function App() {
           <div style={chatStyle}>
             <ul style={msgListStyle}>
         {messageArr.map((message)=>{
-          return <li style={msgStyle}><span style={senderStyle}>{message.name}:</span><br /><span>{message.message}</span><label style={timeStyle}>{message.time}</label><label style={timeStyle}> to {message.sendTo.name}</label></li>
+          if(message.type === 'image'){
+            return <li style={msgStyle}><span style={senderStyle}>{message.name}:</span><br /><img style={imgStyle} src={`${message.message}`} alt=""></img><label style={timeStyle}>{message.time}</label><label style={timeStyle}> to {message.sendTo.name}</label></li>
+          }
+          else {
+            return <li style={msgStyle}><span style={senderStyle}>{message.name}:</span><br /><span>{message.message}</span><label style={timeStyle}>{message.time}</label><label style={timeStyle}> to {message.sendTo.name}</label></li>
+          }
         })}
       </ul>
             <ul style={usersListStyle}>
@@ -87,7 +93,11 @@ function App() {
               })}
             </ul>
       <input style={inputStyle} ref={messageInput} type={'text'} placeholder="your message"></input>
-      <button style={buttonStyle} onClick={sendMsg}>send</button>
+      <button style={buttonStyle} onClick={sendMsg}>send {msgType}</button>
+      <select style={selectStyle} onChange={(e)=>{setMsgType(e.target.value)}}>
+        <option>message</option>
+        <option>image</option>
+      </select>
       <div style={{fontSize: '30px'}}>send to: {msgDes.name}</div>
       <button style={buttonStyle} onClick={()=>{setMsgDes({name: 'everyone', id: msgDes.id})}}>to everyone</button>
       <button style={buttonStyle} onClick={logOut}><Link style={linkStyle} to={'/'}>log out</Link></button>
@@ -96,6 +106,12 @@ function App() {
       
       </Routes></div></Router>
   );
+}
+
+const imgStyle = {
+  height: '150px',
+  width: '150px',
+  borderRadius: '5px'
 }
 
 const msgListStyle = {
@@ -153,9 +169,18 @@ const inputStyle = {
   color: "MediumSlateBlue"
 }
 
+const selectStyle = {
+  height: "45px",
+  width: "150px",
+  border: "4px outset LightGray",
+  fontSize: "25px",
+  marginRight: "25px",
+  color: "MediumSlateBlue"
+}
+
 const buttonStyle = {
   height: "35px",
-  width: "100px",
+  width: "116px",
   border: "3px groove LightSkyBlue",
   backgroundColor: "LightSkyBlue",
   borderRadius: "10px",
