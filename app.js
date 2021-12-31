@@ -32,7 +32,6 @@ io.on("connection", (socket) => {
                 break;
             }
         }
-        console.log(users);
         io.emit("userUpdate", users);
       });
   
