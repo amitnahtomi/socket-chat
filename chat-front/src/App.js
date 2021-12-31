@@ -26,7 +26,14 @@ function App() {
 
   const setUserInfo = () => {
     setUser({id: user.id, name: username.current.value});
+    if(!connection.active) {
+      connection.connect();
+    }
     connection.emit("user", {id: connection.id, name: username.current.value})
+  }
+
+  const logOut = () => {
+    connection.disconnect();
   }
 
   const sendMsg =()=>{
@@ -62,16 +69,16 @@ function App() {
       <Routes>
         <Route path='/' element={
           <div style={logStyle}>
-            <input style={inputStyle} type={'text'} placeholder="user name" ref={username}></input>
-            <button style={buttonStyle} onClick={setUserInfo}><Link style={linkStyle} onClick={checkUsername} to={'/chat'}>log in</Link></button>
-          </div>
+          <input style={inputStyle} type={'text'} placeholder="user name" ref={username}></input>
+          <button style={buttonStyle} onClick={setUserInfo}><Link style={linkStyle} onClick={checkUsername} to={'/chat'}>log in</Link></button>
+        </div>
         }/>
 
         <Route path={'/chat'} element={
           <div style={chatStyle}>
             <ul style={msgListStyle}>
         {messageArr.map((message)=>{
-          return <li style={msgStyle}><span style={senderStyle}>{message.name}:</span><br /><span>{message.message}</span><label style={timeStyle}>{message.time}</label></li>
+          return <li style={msgStyle}><span style={senderStyle}>{message.name}:</span><br /><span>{message.message}</span><label style={timeStyle}>{message.time}</label><label style={timeStyle}> to {message.sendTo.name}</label></li>
         })}
       </ul>
             <ul style={usersListStyle}>
@@ -83,6 +90,7 @@ function App() {
       <button style={buttonStyle} onClick={sendMsg}>send</button>
       <div style={{fontSize: '30px'}}>send to: {msgDes.name}</div>
       <button style={buttonStyle} onClick={()=>{setMsgDes({name: 'everyone', id: msgDes.id})}}>to everyone</button>
+      <button style={buttonStyle} onClick={logOut}><Link style={linkStyle} to={'/'}>log out</Link></button>
           </div>
         }/>
       
@@ -120,7 +128,7 @@ const senderStyle = {
 
 const timeStyle = {
   color: "darkgrey",
-  fontSize: "8px"
+  fontSize: "11px"
 }
 
 const linkStyle = {
