@@ -11,7 +11,7 @@ const connection = io("http://localhost:4000")
 
 function App() {
   const [messageArr, setMessages] = useState([]);
-  const [user, setUser] = useState({id: connection.id, name: ''});
+  const [user, setUser] = useState({id: connection.id, username: ''});
   const [usersList, setUsersList] = useState([]);
   const [msgDes, setMsgDes] = useState({name: 'everyone', id: ''});
   const [msgType, setMsgType] = useState('message');
@@ -26,45 +26,33 @@ function App() {
   };
 
   const setUserInfo = () => {
-    setUser({id: user.id, name: username.current.value});
+    setUser({id: user.id, username: username.current.value});
     if(!connection.active) {
       connection.connect();
     }
-    connection.emit("user", {id: connection.id, name: username.current.value})
-  }
-
-  const logOut = () => {
-    connection.disconnect();
+    connection.emit("user", {id: connection.id, username: username.current.value})
   }
 
   const sendMsg =()=>{
-    connection.emit("message", { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(11, 17), type: msgType });
+    connection.emit("message", { name: user.username, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(11, 17), type: msgType });
     if(msgDes.name !== 'everyone') {
-      setMessages([...messageArr, { name: user.name, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(10, 16), type: msgType }])
+      setMessages([...messageArr, { name: user.username, message: messageInput.current.value, sendTo: msgDes, time: new Date().toLocaleString().slice(10, 16), type: msgType }])
     }
     messageInput.current.value = '';
   }
 
-  connection.on("messageBack", (message) => {
-    setMessages([...messageArr, message])
-  });
-
-  connection.on("userUpdate", (updatedUsersList)=>{
-    setUsersList(updatedUsersList);
-  })
-
-  /*useEffect(()=>{
+  useEffect(()=>{
     
     connection.on("messageBack", (message) => {
       setMessages([...messageArr, message])
     });
 
     connection.on("userUpdate", (updatedUsersList)=>{
-      setUsersList(updatedUsersList);
+        setUsersList(updatedUsersList);
     })
 
   },[messageArr ,usersList])
-*/  return (
+  return (
     <Router>
     <div>
       <Routes>
@@ -89,7 +77,7 @@ function App() {
       </ul>
             <ul style={usersListStyle}>
               {usersList.map((user)=>{
-                return <li style={{cursor: 'pointer'}} onClick={()=>{setMsgDes({name: user.name, id: user.id})}} key={user.id}>{user.name}</li>
+                return <li style={{cursor: 'pointer'}} onClick={()=>{setMsgDes({name: user.username, id: user.id})}} key={user.id}>{user.username}</li>
               })}
             </ul>
       <input style={inputStyle} ref={messageInput} type={'text'} placeholder="your message"></input>
@@ -100,7 +88,7 @@ function App() {
       </select>
       <div style={{fontSize: '30px'}}>send to: {msgDes.name}</div>
       <button style={buttonStyle} onClick={()=>{setMsgDes({name: 'everyone', id: msgDes.id})}}>to everyone</button>
-      <button style={buttonStyle} onClick={logOut}><Link style={linkStyle} to={'/'}>log out</Link></button>
+      <button style={buttonStyle} onClick={()=>{connection.disconnect();}}><Link style={linkStyle} to={'/'}>log out</Link></button>
           </div>
         }/>
       

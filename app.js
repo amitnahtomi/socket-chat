@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         for(let i = 0; i < users.length; i++){
             if(users[i].id === socket.id){
-                io.emit("messageBack", { name: users[i].name, message: "disconnected" });
+                io.emit("messageBack", { name: users[i].username, message: "disconnected", time: new Date().toLocaleString().slice(11, 17), type: 'message', sendTo: {name: 'everyone', id: ''} });
                 users.splice(i, 1);
                 break;
             }
