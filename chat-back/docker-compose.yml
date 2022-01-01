@@ -1,0 +1,13 @@
+version: '3.8'            
+
+services:
+  app:
+    volumes:
+           - .:/chat-back    
+    image: chat-back
+    build: 
+    context: .              
+    ports:                
+      - 4000:4000
+    container_name: chat-back_container
+    command: npm start
